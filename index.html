@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>2026 World Champions</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; background: #020817; }
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    display: grid;
+    place-items: center;
+    overflow-x: hidden;
+  }
+  .stage {
+    position: relative;
+    width: 100%;
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    background: #020817;
+  }
+  .hero {
+    display: block;
+    width: 100%;
+    height: 100vh;
+    object-fit: contain;
+    object-position: center;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+  .shade {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(to bottom, rgba(0,0,0,.05), transparent 28%, transparent 72%, rgba(0,0,0,.32));
+  }
+  .play-overlay {
+    position: absolute;
+    inset: 0;
+    display: none;
+    place-items: center;
+    padding: 24px;
+  }
+  .play-overlay.show { display: grid; }
+  .play-button {
+    width: 84px;
+    height: 84px;
+    border: 1px solid rgba(255,255,255,.55);
+    border-radius: 999px;
+    background: rgba(0,0,0,.58);
+    color: #fff;
+    font-size: 36px;
+    line-height: 1;
+    cursor: pointer;
+    backdrop-filter: blur(5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,.35);
+  }
+  .play-button:focus-visible, .mini-button:focus-visible {
+    outline: 3px solid #fff;
+    outline-offset: 3px;
+  }
+  .hint {
+    position: absolute;
+    top: calc(50% + 58px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,.58);
+    border: 1px solid rgba(255,255,255,.25);
+    border-radius: 999px;
+    padding: 8px 12px;
+    color: #fff;
+    font-size: 14px;
+    white-space: nowrap;
+    backdrop-filter: blur(5px);
+  }
+  .mini-controls {
+    position: absolute;
+    right: max(14px, env(safe-area-inset-right));
+    bottom: max(14px, env(safe-area-inset-bottom));
+    display: flex;
+    gap: 8px;
+  }
+  .mini-button {
+    min-width: 46px;
+    height: 46px;
+    border: 1px solid rgba(255,255,255,.35);
+    border-radius: 999px;
+    background: rgba(0,0,0,.52);
+    color: #fff;
+    font-size: 20px;
+    cursor: pointer;
+    backdrop-filter: blur(5px);
+  }
+  @media (max-width: 700px) {
+    .hero { height: auto; min-height: 100vh; object-fit: contain; }
+    .play-button { width: 76px; height: 76px; font-size: 32px; }
+  }
+</style>
+</head>
+<body>
+<main class="stage" aria-label="New York Knicks 2026 World Champions celebration">
+  <img class="hero" src="knicks-champions.png" alt="2026 World Champions New York Knicks celebration graphic">
+  <div class="shade"></div>
+
+  <div id="playOverlay" class="play-overlay" aria-live="polite">
+    <button id="bigPlay" class="play-button" type="button" aria-label="Play We Are the Champions">▶</button>
+    <div class="hint">Play “We Are the Champions”</div>
+  </div>
+
+  <div class="mini-controls" aria-label="Audio controls">
+    <button id="toggleAudio" class="mini-button" type="button" aria-label="Play music">▶</button>
+  </div>
+
+  <audio id="championsAudio" preload="auto" autoplay loop playsinline>
+    <source src="we-are-the-champions.mp3" type="audio/mpeg">
+  </audio>
+</main>
+
+<script>
+(() => {
+  const audio = document.getElementById('championsAudio');
+  const overlay = document.getElementById('playOverlay');
+  const bigPlay = document.getElementById('bigPlay');
+  const toggle = document.getElementById('toggleAudio');
+
+  const sync = () => {
+    const playing = !audio.paused && !audio.ended;
+    toggle.textContent = playing ? '⏸' : '▶';
+    toggle.setAttribute('aria-label', playing ? 'Pause music' : 'Play music');
+    overlay.classList.toggle('show', !playing);
+  };
+
+  const play = async () => {
+    try {
+      await audio.play();
+    } catch (_) {
+      // Browser blocked autoplay; the visible play control remains available.
+    }
+    sync();
+  };
+
+  bigPlay.addEventListener('click', play);
+  toggle.addEventListener('click', async () => {
+    if (audio.paused) await play();
+    else audio.pause();
+    sync();
+  });
+
+  audio.addEventListener('play', sync);
+  audio.addEventListener('pause', sync);
+  audio.addEventListener('ended', sync);
+
+  // Attempt sound-on autoplay as soon as the page is ready.
+  play();
+})();
+</script>
+</body>
+</html>
